@@ -102,19 +102,6 @@ body {
     max-width: 350px;
     width: 90%;
 }
-#password-input {
-    width: 100%;
-    margin-top: 15px;
-    box-sizing: border-box;
-}
-#login-button {
-    width: 100%;
-    margin-top: 15px;
-}
-.error {
-    color: #dc3545;
-    margin-top: 10px;
-}
 
 /* --- App Container and Controls --- */
 #app-container {
@@ -124,8 +111,13 @@ body {
     box-sizing: border-box;
 }
 
+#controls-card {
+    width: 90%;
+    max-width: 960px;
+    margin: 0 auto 20px auto; 
+}
+
 #controls-panel {
-    margin-bottom: 20px;
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
@@ -135,18 +127,21 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    min-width: 200px;
+    min-width: 200px; /* Base minimum width for customer name on desktop */
 }
 #controls-panel label {
     font-weight: 600;
     margin-bottom: 5px;
 }
 #controls-panel input {
-    width: 100%;
+    width: 70%;
 }
 .small-input {
-    max-width: 120px;
+    max-width: 120px; /* Fixed width for default margin on desktop */
+    min-width: 100px;
+    flex-grow: 0;
 }
+
 
 /* --- Quote Output Area (The Letterhead) --- */
 .paper-style {
@@ -154,6 +149,10 @@ body {
     padding: 40px;
     border: 1px solid #ddd;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+    width: 100%;
+    max-width: 960px; 
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 /* Header/Letterhead */
@@ -164,8 +163,11 @@ body {
     padding-bottom: 15px;
     margin-bottom: 25px;
 }
+/* Logo size fix from previous steps - using the sizes in the file you provided */
 #company-logo {
-    width: 80px;
+    max-width: 80px;
+    max-height: 50px;
+    width: auto;
     height: auto;
     margin-right: 25px;
 }
@@ -198,6 +200,8 @@ body {
     border-collapse: collapse;
     margin-bottom: 20px;
     font-size: 0.95em;
+    /* --- FIX: Force a fixed layout to prevent column stretching on hide --- */
+    table-layout: fixed;
 }
 #quote-table th, #quote-table td {
     border: 1px solid #eee;
@@ -208,6 +212,12 @@ body {
     background-color: #f8f8f8;
     font-weight: 700;
     color: #383838;
+}
+
+/* Active Row Highlight */
+#quote-table tr.active-row {
+    background-color: #fffde7;
+    transition: background-color 0.2s ease;
 }
 
 /* Table Category Headers */
@@ -222,20 +232,34 @@ body {
     font-size: 1.05em;
 }
 
-/* Column Widths and Alignment */
+/* --- COLUMN WIDTH FIXES ---
+    Total Width: 100%
+    1. Item: 35%
+    2. WP/RRP: 18% each
+    3. Margin: 14%
+    4. Action: 15%
+    35 + 18 + 14 + 18 + 15 = 100%
+*/
 .item-col { width: 35%; }
-.price-col { width: 18%; }
+.price-col { width: 18%; } /* Used for both WP and RRP */
 .margin-col { width: 14%; }
 .action-col { width: 15%; } 
+
+/* Additional class to use when columns are hidden (only for Item, WP, RRP) */
+.col-hidden-margin-action .item-col { width: 45%; } /* Increased width from 35% */
+.col-hidden-margin-action .price-col { width: 27.5%; } /* Increased width from 18% */
+.col-hidden-margin-action .margin-col { display: none !important; }
+.col-hidden-margin-action .action-col { display: none !important; }
+
 
 .align-left { text-align: left !important; }
 .align-right { text-align: right !important; }
 .align-center { text-align: center !important; }
 
-/* Table cell inputs - Neumorphic integration */
+/* Table cell inputs - Improved Sizing and Tap Targets */
 #quote-table input {
     width: calc(100% - 10px); 
-    padding: 8px; 
+    padding: 14px 8px; 
     box-sizing: border-box;
     text-align: inherit; 
     border-radius: 6px; 
@@ -244,6 +268,7 @@ body {
         inset -3px -3px 6px #ffffff;
     background-color: #f0f4f7;
     color: #383838;
+    font-size: 1em; 
 }
 
 /* Add New Line Button inside table rows */
@@ -253,15 +278,22 @@ body {
     text-align: center !important;
 }
 .add-line-btn-row .neumorphic-btn {
-    padding: 8px 15px;
-    font-size: 0.85em;
+    padding: 10px 18px;
+    font-size: 0.9em;
+}
+
+/* Add Category Button Area */
+#add-category-area {
+    text-align: center;
+    padding: 15px 0 25px 0;
+    border-top: 1px solid #eee;
 }
 
 .remove-btn {
     background-color: #dc3545;
     color: white;
     border: none;
-    padding: 6px 10px;
+    padding: 10px 10px; 
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9em;
@@ -269,12 +301,6 @@ body {
 }
 .remove-btn:hover {
     background-color: #c82333;
-}
-
-/* Custom Item Area (for live view) */
-#custom-item-area {
-    /* Hide the original singular button */
-    display: none;
 }
 
 /* Exported Custom Item Placeholder */
@@ -302,67 +328,121 @@ body {
 }
 
 
-/* --- Export Buttons --- */
+/* --- Export Buttons (Container for Hide Margin Checkbox and Export Buttons) --- */
+#export-controls-container {
+    margin: 20px auto;
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
 #export-buttons {
-    margin: 20px 0;
     text-align: center;
 }
 .export-btn {
     margin: 0 10px;
 }
 
+
 /* --- Media Queries (Mobile Optimization) --- */
 @media (max-width: 768px) {
+    
     #app-container {
-        padding: 10px;
+        padding: 0; 
+        width: 100%;
+        max-width: 100%;
     }
+    
+    #controls-card {
+        margin: 15px auto; 
+        width: 90%; 
+        box-sizing: border-box;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    #controls-panel {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* FIX: Constrain ALL inputs in the control panel to a reasonable width on mobile */
+    .control-group {
+        min-width: 100%;
+        max-width: 250px; 
+        flex-grow: 0;
+    }
+    .control-group input {
+         max-width: 70%; /* Ensures input fills the constrained control-group width */
+    }
+    
+    /* FIX: Make the Default Margin input box small, but within the constrained group */
+    .small-input {
+        max-width: 150px; 
+        min-width: 120px;
+        flex-grow: 0;
+    }
+
     .paper-style {
-        padding: 20px 15px;
+        padding: 20px 10px; 
+        border: none; 
+        box-shadow: none;
+        width: 100%;
+        margin: 0;
     }
+    
     #quote-header {
         flex-direction: column;
         text-align: center;
+        padding-bottom: 10px;
     }
     #company-logo {
+        max-width: 60px; 
+        max-height: 40px;
+        width: auto;
+        height: auto;
         margin: 0 0 10px 0;
     }
     .header-text h1 {
-        font-size: 1.5em;
+        font-size: 1.4em;
     }
+    
     #quote-metadata {
         flex-direction: column;
         gap: 5px;
+        font-size: 0.9em;
     }
     
-    /* Table Fixes for Mobile */
+    /* Table Fixes for Mobile: making inputs larger */
     #quote-table {
-        font-size: 0.75em; /* Smaller font for tightness */
-        display: block; /* Allows horizontal scrolling if needed, though we aim for fit */
+        font-size: 0.8em; 
         width: 100%;
     }
     #quote-table th, #quote-table td {
-        padding: 8px 5px; /* Reduced padding */
+        padding: 4px 4px; 
     }
 
+    /* Column Widths adjusted for better mobile fit */
+    .item-col { width: 30%; }
+    .price-col { width: 22%; } 
+    .margin-col { width: 18%; }
+    .action-col { width: 18%; }
+    
     /* Input sizing in cells */
     #quote-table input {
-        width: calc(100% - 5px); 
-        padding: 6px; 
+        width: 100%; 
+        padding: 12px 4px; 
         font-size: 0.9em;
     }
 
-    .category-header {
-        font-size: 1em;
+    .remove-btn {
+        padding: 8px 6px;
+        font-size: 0.8em;
     }
-    
-    /* Input/Control Panel Fixes */
-    #controls-panel {
-        flex-direction: column;
-        gap: 15px;
-    }
-    .neumorphic-btn {
-        padding: 10px 15px;
-    }
+
     .export-btn {
         display: block;
         width: 90%;
