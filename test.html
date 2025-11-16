@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>True Origin Foods Quote Generator</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <div id="login-container" class="neumorphic-card">
+        <h2>True Origin Foods</h2>
+        <p>Please enter the password to access the quotation tool.</p>
+        <input type="password" id="password-input" placeholder="Enter Password" class="neumorphic-input">
+        <button id="login-button" class="neumorphic-btn primary-btn">Login</button>
+        <p id="login-message" class="error"></p>
+    </div>
+
+    <div id="app-container" class="hidden">
+        
+        <div id="controls-panel" class="neumorphic-card">
+            <h3>Quote Details</h3>
+            <div class="control-group">
+                <label for="customer-name">Customer Name:</label>
+                <input type="text" id="customer-name" value="Retailer Name" placeholder="Enter Customer/Company Name" class="neumorphic-input">
+            </div>
+            <div class="control-group">
+                <label for="default-margin">Default Margin (%):</label>
+                <input type="number" id="default-margin" value="30" min="0" max="100" class="neumorphic-input small-input">
+            </div>
+        </div>
+
+        <div id="quote-output-area" class="paper-style">
+            
+            <header id="quote-header">
+                <img id="company-logo" src="logo.png" alt="True Origin Foods Logo">
+                <div class="header-text">
+                    <h1>TRUE ORIGIN FOODS</h1>
+                    <p class="slogan">Wholesale Price Quotation</p>
+                </div>
+            </header>
+            
+            <div id="quote-metadata">
+                <p><strong>Customer:</strong> <span id="output-customer-name">Retailer Name</span></p>
+                <p><strong>Date:</strong> <span id="output-date"></span></p>
+            </div>
+
+            <table id="quote-table">
+                <thead>
+                    <tr>
+                        <th class="item-col align-left">Item</th>
+                        <th class="price-col align-right">Wholesale Price (₹)</th>
+                        <th class="margin-col align-center">Margin (%)</th>
+                        <th class="price-col align-right">R.R.P. (₹)</th>
+                        <th class="action-col align-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="quote-table-body">
+                    </tbody>
+            </table>
+
+            <div id="custom-item-area">
+                <button id="add-new-item-button" class="neumorphic-btn secondary-btn">Add New Product Line</button>
+            </div>
+            <div id="exported-custom-item-placeholder" class="hidden">
+                <p class="contact-us-text">Please contact us for custom items.</p>
+            </div>
+
+
+            <p id="quote-footer">
+                Note: Prices are dynamic. <br>
+                R.R.P. (Recommended Retail Price) is a suggestion for retail sale, allowing the retailer to understand their potential profit margin.
+            </p>
+
+        </div>
+
+        <div id="export-buttons">
+            <button id="export-pdf-button" class="neumorphic-btn export-btn pdf-btn">Export as PDF</button>
+            <button id="export-image-button" class="neumorphic-btn export-btn image-btn">Export as Image (PNG)</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

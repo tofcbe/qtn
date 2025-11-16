@@ -1,0 +1,371 @@
+/* --- Color Palette --- */
+/* Background: #f0f4f7 (Light Gray/Blue) */
+/* Primary/Text: #383838 (Dark Gray/Black) */
+/* Accent/Success: #4CAF50 (Muted Green) */
+/* Accent/Warning: #007bff (Blue) */
+/* Accent/Danger: #dc3545 (Red) */
+
+/* --- Global Reset and Setup --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f7; 
+    margin: 0;
+    padding: 0;
+    color: #383838;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- Neumorphic Elements --- */
+.neumorphic-card {
+    background-color: #f0f4f7;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 
+        9px 9px 18px #d9dce0,
+        -9px -9px 18px #ffffff;
+}
+
+.neumorphic-input {
+    border: none;
+    outline: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background-color: #f0f4f7;
+    box-shadow: 
+        inset 5px 5px 10px #d9dce0,
+        inset -5px -5px 10px #ffffff;
+    transition: all 0.2s ease-in-out;
+    color: #383838; 
+}
+
+.neumorphic-input:focus {
+    box-shadow: 
+        inset 2px 2px 5px #d9dce0,
+        inset -2px -2px 5px #ffffff;
+}
+
+.neumorphic-btn {
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    background-color: #f0f4f7;
+    box-shadow: 
+        6px 6px 12px #d9dce0,
+        -6px -6px 12px #ffffff;
+    transition: all 0.3s ease-in-out;
+}
+
+.neumorphic-btn:hover {
+    box-shadow: 
+        3px 3px 6px #d9dce0,
+        -3px -3px 6px #ffffff;
+}
+
+.neumorphic-btn:active {
+    box-shadow: 
+        inset 3px 3px 6px #d9dce0,
+        inset -3px -3px 6px #ffffff;
+}
+
+/* --- Specific Button Styles --- */
+.primary-btn {
+    background-color: #383838;
+    color: white;
+}
+.secondary-btn {
+    color: #4CAF50;
+}
+.pdf-btn {
+    background-color: #dc3545;
+    color: white;
+}
+.image-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+
+/* --- Login Screen Styling --- */
+#login-container {
+    margin-top: 20vh;
+    text-align: center;
+    max-width: 350px;
+    width: 90%;
+}
+#password-input {
+    width: 100%;
+    margin-top: 15px;
+    box-sizing: border-box;
+}
+#login-button {
+    width: 100%;
+    margin-top: 15px;
+}
+.error {
+    color: #dc3545;
+    margin-top: 10px;
+}
+
+/* --- App Container and Controls --- */
+#app-container {
+    width: 100%;
+    max-width: 1000px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#controls-panel {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+}
+.control-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 200px;
+}
+#controls-panel label {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+#controls-panel input {
+    width: 100%;
+}
+.small-input {
+    max-width: 120px;
+}
+
+/* --- Quote Output Area (The Letterhead) --- */
+.paper-style {
+    background-color: #ffffff;
+    padding: 40px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+}
+
+/* Header/Letterhead */
+#quote-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid #4CAF50; 
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+#company-logo {
+    width: 80px;
+    height: auto;
+    margin-right: 25px;
+}
+.header-text h1 {
+    margin: 0;
+    font-size: 2em;
+    letter-spacing: 1px;
+    color: #383838;
+}
+.header-text .slogan {
+    margin: 5px 0 0;
+    color: #555;
+    font-style: italic;
+    font-size: 1em;
+}
+
+/* Metadata */
+#quote-metadata {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 1em;
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Table Styling */
+#quote-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+}
+#quote-table th, #quote-table td {
+    border: 1px solid #eee;
+    padding: 12px 10px;
+    text-align: left; 
+}
+#quote-table thead th {
+    background-color: #f8f8f8;
+    font-weight: 700;
+    color: #383838;
+}
+
+/* Table Category Headers */
+.category-header {
+    background-color: #e6f7e6; 
+    font-weight: bold;
+    color: #383838;
+    text-align: left !important;
+    padding: 10px;
+    border-top: 2px solid #4CAF50 !important;
+    border-bottom: 1px solid #4CAF50 !important;
+    font-size: 1.05em;
+}
+
+/* Column Widths and Alignment */
+.item-col { width: 35%; }
+.price-col { width: 18%; }
+.margin-col { width: 14%; }
+.action-col { width: 15%; } 
+
+.align-left { text-align: left !important; }
+.align-right { text-align: right !important; }
+.align-center { text-align: center !important; }
+
+/* Table cell inputs - Neumorphic integration */
+#quote-table input {
+    width: calc(100% - 10px); 
+    padding: 8px; 
+    box-sizing: border-box;
+    text-align: inherit; 
+    border-radius: 6px; 
+    box-shadow: 
+        inset 3px 3px 6px #d9dce0,
+        inset -3px -3px 6px #ffffff;
+    background-color: #f0f4f7;
+    color: #383838;
+}
+
+/* Add New Line Button inside table rows */
+.add-line-btn-row td {
+    border: none !important;
+    padding: 5px 10px 15px !important;
+    text-align: center !important;
+}
+.add-line-btn-row .neumorphic-btn {
+    padding: 8px 15px;
+    font-size: 0.85em;
+}
+
+.remove-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+.remove-btn:hover {
+    background-color: #c82333;
+}
+
+/* Custom Item Area (for live view) */
+#custom-item-area {
+    /* Hide the original singular button */
+    display: none;
+}
+
+/* Exported Custom Item Placeholder */
+#exported-custom-item-placeholder {
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+}
+.contact-us-text {
+    font-size: 0.9em;
+    color: #555;
+    font-style: italic;
+    margin: 0;
+}
+
+
+/* Footer */
+#quote-footer {
+    text-align: center;
+    font-size: 0.85em;
+    color: #888;
+    margin-top: 30px;
+    line-height: 1.4;
+}
+
+
+/* --- Export Buttons --- */
+#export-buttons {
+    margin: 20px 0;
+    text-align: center;
+}
+.export-btn {
+    margin: 0 10px;
+}
+
+/* --- Media Queries (Mobile Optimization) --- */
+@media (max-width: 768px) {
+    #app-container {
+        padding: 10px;
+    }
+    .paper-style {
+        padding: 20px 15px;
+    }
+    #quote-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    #company-logo {
+        margin: 0 0 10px 0;
+    }
+    .header-text h1 {
+        font-size: 1.5em;
+    }
+    #quote-metadata {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    /* Table Fixes for Mobile */
+    #quote-table {
+        font-size: 0.75em; /* Smaller font for tightness */
+        display: block; /* Allows horizontal scrolling if needed, though we aim for fit */
+        width: 100%;
+    }
+    #quote-table th, #quote-table td {
+        padding: 8px 5px; /* Reduced padding */
+    }
+
+    /* Input sizing in cells */
+    #quote-table input {
+        width: calc(100% - 5px); 
+        padding: 6px; 
+        font-size: 0.9em;
+    }
+
+    .category-header {
+        font-size: 1em;
+    }
+    
+    /* Input/Control Panel Fixes */
+    #controls-panel {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .neumorphic-btn {
+        padding: 10px 15px;
+    }
+    .export-btn {
+        display: block;
+        width: 90%;
+        margin: 10px auto;
+    }
+}
