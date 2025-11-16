@@ -1,11 +1,10 @@
 // --- 1. CONFIGURATION ---
 
-const CORRECT_PASSWORD = "admin123";
+const CORRECT_PASSWORD = "admin123"; 
 const COMPANY_NAME = "TRUE ORIGIN FOODS";
-const COMPANY_LOGO_FILENAME = "logo.png"; 
 const CURRENCY_SYMBOL = '₹';
 
-// Default product list with categories
+// Default product list 
 const defaultProducts = [
     { item: "CREAM BUN", price: 17.00, category: "Breads & Buns" },
     { item: "JAM BUN", price: 16.00, category: "Breads & Buns" },
@@ -13,7 +12,6 @@ const defaultProducts = [
     { item: "BURGER BUN", price: 14.00, category: "Breads & Buns" },
     { item: "JAM ROLL", price: 17.00, category: "Breads & Buns" },
     { item: "CHOCO DONUT", price: 18.00, category: "Breads & Buns" },
-    // Moved Tea Buns to Breads & Buns
     { item: "SPECIAL BUN", price: 13.00, category: "Breads & Buns" },
     { item: "TEA BUN 60gm", price: 8.00, category: "Breads & Buns" },
 
@@ -63,10 +61,14 @@ function initializeApp() {
 
     document.getElementById('customer-name').addEventListener('input', updateCustomerName);
     document.getElementById('default-margin').addEventListener('input', updateAllMargin);
-    // Removed the singular Add New Item button listener
     document.getElementById('export-pdf-button').addEventListener('click', () => exportQuote('pdf'));
     document.getElementById('export-image-button').addEventListener('click', () => exportQuote('png'));
-
+    
+    const addCategoryButton = document.getElementById('add-category-button');
+    if (addCategoryButton) {
+        addCategoryButton.addEventListener('click', promptForNewCategory);
+    }
+    
     renderQuoteTable();
 }
 
@@ -86,6 +88,7 @@ function updateAllMargin(event) {
             marginInput.value = newMargin.toFixed(2);
         }
         item.margin = newMargin;
+        // Trigger calculation to update RRP based on new Margin
         calculateItemRow(item.id, 'margin');
     });
 }
@@ -97,7 +100,6 @@ function renderQuoteTable() {
 
     const defaultMargin = parseFloat(document.getElementById('default-margin').value) || 30;
 
-    // Sort items by category
     const sortedItems = [...currentQuoteItems].sort((a, b) => {
         if (a.category && b.category) {
             return a.category.localeCompare(b.category);
@@ -108,33 +110,30 @@ function renderQuoteTable() {
     });
 
     let currentCategory = null;
-    let itemsInCurrentCategory = [];
 
     sortedItems.forEach((item, index) => {
         if (!item.id) item.id = Date.now() + index;
         if (item.margin === undefined) item.margin = defaultMargin;
+        // Ensure RRP is initialized/calculated
+        if (item.rrp === undefined) {
+             item.rrp = item.price / (1 - item.margin / 100);
+        }
 
-        // Check if we need to render the previous category's "Add Line" button
         if (item.category && item.category !== currentCategory) {
             if (currentCategory !== null) {
                 renderAddLineButton(currentCategory);
             }
-            // Add new category header
             const categoryRow = tableBody.insertRow();
             const categoryCell = categoryRow.insertCell();
             categoryCell.colSpan = 5; 
             categoryCell.className = 'category-header';
             categoryCell.textContent = item.category;
             currentCategory = item.category;
-            itemsInCurrentCategory = []; // Reset for new category
         }
         
-        // Render item row
         renderItemRow(item);
-        itemsInCurrentCategory.push(item);
     });
 
-    // Render the Add Line button for the very last category
     if (currentCategory !== null) {
         renderAddLineButton(currentCategory);
     }
@@ -144,13 +143,12 @@ function renderQuoteTable() {
 function renderAddLineButton(category) {
     const tableBody = document.getElementById('quote-table-body');
     const addLineRow = tableBody.insertRow();
-    addLineRow.className = 'add-line-btn-row'; // Class to hide on export
+    addLineRow.className = 'add-line-btn-row'; 
     
     const buttonCell = addLineRow.insertCell();
     buttonCell.colSpan = 5;
     
-    // Use the category name to identify where to add the new product
-    buttonCell.innerHTML = `<button class="neumorphic-btn secondary-btn" onclick="addNewItem('${category}')">Add New Product Line to ${category}</button>`;
+    buttonCell.innerHTML = `<button class="neumorphic-btn secondary-btn" onclick="addNewItem('${category}')">➕ Add Product Line to ${category}</button>`;
 }
 
 // Renders a single item row with inputs
@@ -160,31 +158,39 @@ function renderItemRow(item) {
     newRow.id = `row-${item.id}`;
     newRow.setAttribute('data-category', item.category || 'Custom');
 
+    // Add event listeners for row highlighting
+    newRow.addEventListener('focusin', () => newRow.classList.add('active-row'));
+    newRow.addEventListener('focusout', () => newRow.classList.remove('active-row'));
+
     // 1. Item Name (Left Align)
     const itemCell = newRow.insertCell();
     itemCell.className = 'item-col align-left';
     itemCell.innerHTML = `<input type="text" id="item-${item.id}" value="${item.item}" class="neumorphic-input align-left" oninput="updateItemData(${item.id}, 'item', this.value)">`;
 
-    // 2. Wholesale Price (WP) (Right Align)
+    // 2. Wholesale Price (WP) (Right Align) - type="tel" for mobile number pad
     const wpCell = newRow.insertCell();
     wpCell.className = 'price-col align-right';
-    wpCell.innerHTML = `<input type="number" id="price-${item.id}" value="${item.price.toFixed(2)}" min="0.01" step="0.50" class="neumorphic-input price-input align-right" data-key="price" oninput="calculateItemRow(${item.id}, 'price')">`;
+    // Use item.price for display, and pass 'price' key
+    wpCell.innerHTML = `<input type="tel" id="price-${item.id}" value="${item.price.toFixed(2)}" min="0.01" step="0.50" class="neumorphic-input price-input align-right" data-key="price" oninput="calculateItemRow(${item.id}, 'price')">`;
 
-    // 3. Retailer Margin (%) (Center Align)
+    // 3. Retailer Margin (%) (Center Align) - type="tel" for mobile number pad
     const marginCell = newRow.insertCell();
     marginCell.className = 'margin-col align-center';
-    marginCell.innerHTML = `<input type="number" id="margin-${item.id}" value="${item.margin.toFixed(2)}" min="0" max="100" step="0.01" class="neumorphic-input margin-input align-center" data-key="margin" oninput="calculateItemRow(${item.id}, 'margin')">`;
+    // Use item.margin for display, and pass 'margin' key
+    marginCell.innerHTML = `<input type="tel" id="margin-${item.id}" value="${item.margin.toFixed(2)}" min="0" max="100" step="0.01" class="neumorphic-input margin-input align-center" data-key="margin" oninput="calculateItemRow(${item.id}, 'margin')">`;
 
-    // 4. Recommended Retail Price (RRP) (Right Align)
+    // 4. Recommended Retail Price (RRP) (Right Align) - type="tel" for mobile number pad
     const rrpCell = newRow.insertCell();
     rrpCell.className = 'price-col align-right';
-    rrpCell.innerHTML = `<input type="number" id="rrp-${item.id}" value="" min="0.01" step="0.50" class="neumorphic-input price-input align-right" data-key="rrp" oninput="calculateItemRow(${item.id}, 'rrp')">`;
+    // Use item.rrp for display, and pass 'rrp' key
+    rrpCell.innerHTML = `<input type="tel" id="rrp-${item.id}" value="${item.rrp ? item.rrp.toFixed(2) : ''}" min="0.01" step="0.50" class="neumorphic-input price-input align-right" data-key="rrp" oninput="calculateItemRow(${item.id}, 'rrp')">`;
     
     // 5. Remove Button (Center Align)
     const actionCell = newRow.insertCell();
     actionCell.className = 'action-col align-center';
     actionCell.innerHTML = `<button class="remove-btn" onclick="removeItem(${item.id})">Remove</button>`;
 
+    // Initial calculation to populate RRP (This is necessary because initial RRP value is calculated on load)
     calculateItemRow(item.id, 'margin'); 
 }
 
@@ -194,7 +200,7 @@ function updateItemData(itemId, key, value) {
     item[key] = value; 
 }
 
-// --- 5. DYNAMIC 2-OF-3 CALCULATION LOGIC ---
+// --- 5. DYNAMIC 2-OF-3 CALCULATION LOGIC (SIMPLIFIED) ---
 
 function calculateItemRow(itemId, lastChangedKey) {
     const item = currentQuoteItems.find(i => i.id == itemId);
@@ -204,188 +210,277 @@ function calculateItemRow(itemId, lastChangedKey) {
     const rrpInput = document.getElementById(`rrp-${itemId}`);
     const marginInput = document.getElementById(`margin-${itemId}`);
 
-    let wp = parseFloat(wpInput.value);
-    let rrp = parseFloat(rrpInput.value);
-    let margin = parseFloat(marginInput.value);
+    // Update internal item data from inputs immediately for the changed key
+    item.price = parseFloat(wpInput.value) || 0;
+    item.rrp = parseFloat(rrpInput.value) || 0;
+    item.margin = parseFloat(marginInput.value) || 0;
 
-    wp = isNaN(wp) || wp < 0 ? 0 : wp;
-    rrp = isNaN(rrp) || rrp < 0 ? 0 : rrp;
-    margin = isNaN(margin) || margin < 0 ? 0 : margin;
+    const wp = item.price;
+    const rrp = item.rrp;
+    const margin = item.margin;
+    
+    let calculatedValue = NaN;
+    let targetInput = null;
+    let targetKey = null;
 
-    const epsilon = 0.0001;
-
-    let calculatedValue;
-    let targetInput;
-    let targetKey;
-
-    try {
-        // Case 1: WP and Margin known -> Calculate RRP
-        if ((lastChangedKey === 'price' || lastChangedKey === 'margin') && wp > epsilon && margin < 100) {
-            calculatedValue = wp / (1 - margin / 100);
-            targetInput = rrpInput;
-            targetKey = 'rrp';
-        } 
-        // Case 2: RRP and Margin known -> Calculate WP
-        else if ((lastChangedKey === 'rrp' || lastChangedKey === 'margin') && rrp > epsilon && margin < 100) {
-            calculatedValue = rrp * (1 - margin / 100);
-            targetInput = wpInput;
-            targetKey = 'price';
-        } 
-        // Case 3: WP and RRP known -> Calculate Margin
-        else if ((lastChangedKey === 'price' || lastChangedKey === 'rrp') && wp > epsilon && rrp > wp) {
+    // RULE 1 & 3: WP or RRP changed -> Calculate Margin
+    // Must have WP and RRP, and RRP must be > WP
+    if (lastChangedKey === 'price' || lastChangedKey === 'rrp') {
+        if (wp > 0 && rrp > wp) {
+            // Formula: Margin = (1 - (WP / RRP)) * 100
             calculatedValue = (1 - (wp / rrp)) * 100;
             targetInput = marginInput;
             targetKey = 'margin';
+            // Update internal model immediately
+            item.margin = calculatedValue;
+            
+            // If WP was changed, we must update RRP based on the newly calculated margin 
+            // to keep the RRP field consistent with the W.P. & Margin.
+            if (lastChangedKey === 'price' && calculatedValue >= 0 && calculatedValue < 100) {
+                 const newRRP = wp / (1 - calculatedValue / 100);
+                 rrpInput.value = newRRP.toFixed(2);
+                 item.rrp = newRRP;
+            }
+            
+        } else if (wp > 0 && rrp <= wp) {
+            // RRP is too low, Margin must be 0 or negative
+            calculatedValue = 0.00;
+            targetInput = marginInput;
+            targetKey = 'margin';
+            item.margin = calculatedValue;
+
+        } else if (wp === 0) {
+            // If WP is cleared, clear Margin and RRP
+             marginInput.value = "0.00";
+             rrpInput.value = "0.00";
+             item.margin = 0;
+             item.rrp = 0;
+             return;
         } else {
-            return;
+             marginInput.value = "0.00";
+             item.margin = 0;
+             return;
         }
-
-        if (isFinite(calculatedValue)) {
-            targetInput.value = calculatedValue.toFixed(2);
-            item[targetKey] = parseFloat(targetInput.value);
-        }
-
-    } catch (e) {
-        console.error("Calculation error:", e);
+    } 
+    
+    // RULE 2: Margin changed -> Calculate RRP
+    else if (lastChangedKey === 'margin' && wp > 0 && margin >= 0 && margin < 100) {
+        // Formula: RRP = WP / (1 - Margin / 100)
+        calculatedValue = wp / (1 - margin / 100);
+        targetInput = rrpInput;
+        targetKey = 'rrp';
+        item.rrp = calculatedValue;
+    }
+    
+    // Apply calculated value to the target input
+    if (targetInput && isFinite(calculatedValue)) {
+        targetInput.value = calculatedValue.toFixed(2);
+        item[targetKey] = parseFloat(targetInput.value); // Store the final rounded value in the item
     }
 }
 
 
-// Modified to accept category for correct placement
-function addNewItem(category = 'Custom') {
+// --- 6. ADD CATEGORY / ADD ITEM LOGIC ---
+
+function promptForNewCategory() {
+    const categoryName = prompt("Please enter the name for the new category (e.g., Seasonal Items):");
+    if (categoryName && categoryName.trim()) {
+        addNewCategory(categoryName.trim());
+    }
+}
+
+function addNewCategory(category) {
     const defaultMargin = parseFloat(document.getElementById('default-margin').value) || 30;
+    
     const newItem = { 
-        item: "Custom Product", 
+        item: "New Custom Product", 
         price: 0.00, 
         margin: defaultMargin,
         category: category,
         id: Date.now() 
     };
+    // Calculate RRP for the new item
+    newItem.rrp = newItem.price / (1 - newItem.margin / 100); 
 
-    // Find the insertion index: after the last item of this category
+    currentQuoteItems.push(newItem);
+    
+    renderQuoteTable(); 
+}
+
+function addNewItem(category = 'Custom') {
+    const defaultMargin = parseFloat(document.getElementById('default-margin').value) || 30;
+    const newItem = { 
+        item: "New Custom Product", 
+        price: 0.00, 
+        margin: defaultMargin,
+        category: category,
+        id: Date.now() 
+    };
+    // Calculate RRP for the new item
+    newItem.rrp = newItem.price / (1 - newItem.margin / 100); 
+
     const lastItemIndex = currentQuoteItems.map(i => i.category).lastIndexOf(category);
     
     if (lastItemIndex !== -1) {
         currentQuoteItems.splice(lastItemIndex + 1, 0, newItem);
     } else {
-        currentQuoteItems.push(newItem); // Should only happen if 'Custom' category is not found
+        currentQuoteItems.push(newItem); 
     }
 
-    renderQuoteTable(); // Re-render the whole table to place the new item and buttons correctly
+    renderQuoteTable(); 
 }
 
-// Removes an item from the table
 function removeItem(itemId) {
     currentQuoteItems = currentQuoteItems.filter(item => item.id !== itemId);
-    renderQuoteTable(); // Re-render to update grouping and buttons
+    renderQuoteTable(); 
 }
 
-// --- 6. EXPORT LOGIC ---
+// Helper function for confirmation popup
+function showExportConfirmation(type) {
+    alert(`✅ Quote successfully exported as a ${type.toUpperCase()}!`);
+}
+
+// --- 7. EXPORT LOGIC (FIXED FOR HIDING MARGIN & ACTION COLUMNS) ---
 
 async function exportQuote(type) {
-    // 1. Pre-export adjustments (Hiding controls and preparing table)
     const controlsPanel = document.getElementById('controls-panel');
     const exportButtons = document.getElementById('export-buttons');
     const exportedCustomPlaceholder = document.getElementById('exported-custom-item-placeholder');
-    const actionColumn = document.querySelectorAll('.action-col');
+    const addCategoryArea = document.getElementById('add-category-area'); 
     const tableBody = document.getElementById('quote-table-body');
-    const addLineButtons = document.querySelectorAll('.add-line-btn-row'); // Select the new button rows
+    const addLineButtons = document.querySelectorAll('.add-line-btn-row'); 
+    const quoteTable = document.getElementById('quote-table'); // Get the main table element
     
-    // Hide controls and buttons
+    // --- Logic: Check if Margin Column needs to be hidden ---
+    const hideMarginControl = document.getElementById('hide-margin-checkbox');
+    const hideMargin = hideMarginControl ? hideMarginControl.checked : false;
+
+    // --- STEP 1: PREP UI for Export ---
     controlsPanel.style.display = 'none';
     exportButtons.style.display = 'none';
-
-    // Hide all Add New Line buttons
+    if (addCategoryArea) addCategoryArea.style.display = 'none';
     addLineButtons.forEach(row => row.style.display = 'none');
-    // Show the single "Please contact us" text at the very bottom
     exportedCustomPlaceholder.classList.remove('hidden');
 
-    // Hide the 'Action' column headers and cells
+    // Hide Action column (Remove buttons)
     document.querySelectorAll('#quote-table th.action-col').forEach(th => th.style.display = 'none');
-    actionColumn.forEach(col => col.style.display = 'none');
+    document.querySelectorAll('.action-col').forEach(col => col.style.display = 'none');
+    
+    // Apply the special CSS class for table column sizing if margin is hidden
+    if (hideMargin) {
+        quoteTable.classList.add('col-hidden-margin-action');
+    }
 
-    // Convert inputs to text nodes for clean output
+    // --- STEP 2: Convert Inputs to Static Text ---
     const inputsToRestore = [];
     tableBody.querySelectorAll('input').forEach(input => {
         const value = input.value;
         const key = input.dataset.key;
         let displayText = value;
 
+        // Skip converting margin input if the whole margin column is now hidden by CSS
+        if (hideMargin && key === 'margin') {
+            return;
+        }
+
         if (key === 'margin') {
             displayText += '%';
         } else if (key === 'price' || key === 'rrp') {
-            displayText = `${CURRENCY_SYMBOL} ${value}`;
+             const itemId = input.id.split('-')[1];
+             const item = currentQuoteItems.find(i => i.id == itemId);
+
+             if (item && item[key] !== undefined) {
+                 displayText = `${CURRENCY_SYMBOL} ${item[key].toFixed(2)}`;
+             } else {
+                 displayText = `${CURRENCY_SYMBOL} ${parseFloat(value).toFixed(2)}`;
+             }
         }
         
         const textNode = document.createElement('span');
         textNode.textContent = displayText;
         textNode.classList.add('exported-text'); 
         
-        inputsToRestore.push({ parent: input.parentNode, input: input });
+        inputsToRestore.push({ parent: input.parentNode, input: input, value: value });
 
         input.parentNode.replaceChild(textNode, input);
     });
-
-    // 2. Generate Canvas from HTML
-    const quoteElement = document.getElementById('quote-output-area');
-    const canvas = await html2canvas(quoteElement, {
-        scale: 2, 
-        logging: false,
-        useCORS: true 
-    });
-
-    // 3. Export based on type
-    const customerName = document.getElementById('output-customer-name').textContent;
-    const fileName = `Quote_${COMPANY_NAME}_${customerName}`;
     
-    if (type === 'png') {
-        const image = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = `${fileName}.png`;
-        link.href = image;
-        link.click();
-    } else if (type === 'pdf') {
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        
-        const imgWidth = 210; 
-        const pageHeight = 297; 
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        let heightLeft = imgHeight;
-        
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        let position = 0;
+    // --- STEP 3: Generate Canvas ---
+    const quoteElement = document.getElementById('quote-output-area');
 
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+    try {
+        const canvas = await html2canvas(quoteElement, {
+            scale: 2, 
+            logging: false,
+            allowTaint: true, 
+            useCORS: true, 
+        });
 
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
+        const customerName = document.getElementById('output-customer-name').textContent;
+        const fileName = `Quote_${COMPANY_NAME}_${customerName}`;
+        
+        // --- STEP 4: Export Logic (PNG/PDF) ---
+        if (type === 'png') {
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `${fileName}.png`;
+            link.href = image;
+            link.click();
+            showExportConfirmation(type); 
+        } else if (type === 'pdf') {
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            
+            const imgWidth = 210; 
+            const pageHeight = 297; 
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            let position = 0;
+
             pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
+
+            while (heightLeft > 0) {
+                pdf.addPage();
+                position = position - pageHeight;
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            pdf.save(`${fileName}.pdf`);
+            showExportConfirmation(type); 
+        }
+    } catch (error) {
+        console.error("Export failed:", error);
+        alert(`❌ Export Failed! Please ensure your logo is Base64 encoded in index.html, or check your browser console for the error.`);
+    } finally {
+        // --- STEP 5: Restore UI ---
+        
+        // Remove the special CSS class if it was applied
+        if (hideMargin) {
+            quoteTable.classList.remove('col-hidden-margin-action');
         }
 
-        pdf.save(`${fileName}.pdf`);
+        // Restore inputs
+        inputsToRestore.forEach(item => {
+            const textNode = item.parent.querySelector('.exported-text');
+            if (textNode) {
+                item.parent.replaceChild(item.input, textNode);
+                item.input.value = item.value; 
+            }
+        });
+
+        // Restore controls
+        controlsPanel.style.display = 'flex';
+        exportButtons.style.display = 'block';
+        if (addCategoryArea) addCategoryArea.style.display = 'block';
+        exportedCustomPlaceholder.classList.add('hidden');
+        addLineButtons.forEach(row => row.style.display = 'table-row'); 
+
+        // Restore Action column
+        document.querySelectorAll('#quote-table th.action-col').forEach(th => th.style.display = 'table-cell');
+        document.querySelectorAll('.action-col').forEach(col => col.style.display = 'table-cell');
     }
-
-    // 4. Restore hidden elements and inputs
-    
-    // Restore inputs first
-    inputsToRestore.forEach(item => {
-        const textNode = item.parent.querySelector('.exported-text');
-        if (textNode) {
-            item.parent.replaceChild(item.input, textNode);
-        }
-    });
-
-    // Restore controls and buttons
-    controlsPanel.style.display = 'flex';
-    exportButtons.style.display = 'block';
-    exportedCustomPlaceholder.classList.add('hidden');
-    addLineButtons.forEach(row => row.style.display = 'table-row'); // Restore Add New Line buttons
-
-    // Restore action column headers and cells
-    document.querySelectorAll('#quote-table th.action-col').forEach(th => th.style.display = 'table-cell');
-    actionColumn.forEach(col => col.style.display = 'table-cell');
 }
